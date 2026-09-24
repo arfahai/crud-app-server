@@ -2,9 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const dns = require("dns");
-
-dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 const router = require("./routes/userRoute");
 
@@ -15,11 +12,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/users", router);
+let isConnected = false;
 
-mongoose
-  .connect(process.env.MONGOURL)
-  .then(() => console.log("Database Connected"))
-  .catch((error) => console.log("Database Connection Error:", error));
+app.use(async (req, res, next) => {
+  try {
+    if (!isConnected) {
+      await mongoose.connect(process.env.MONGOURL);
+      isConnected = true;
+      console.log("Database Connected");
+    }
+
+    next();
+  } catch (error) {
+    console.log("Database Connection Error:", error);
+    res.status(500).json({ error: "Database connection failed" });
+  }
+});
+
+app.use("/users", router);
 
 module.exports = app;
