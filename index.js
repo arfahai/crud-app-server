@@ -2,8 +2,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const dns =require("dns");
-dns.setServers(["8.8.8.8","1.1.1.1"]);
+const dns = require("dns");
+
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 const router = require("./routes/userRoute");
 
@@ -18,11 +19,7 @@ app.use("/users", router);
 
 mongoose
   .connect(process.env.MONGOURL)
-  .then(() => {
-    console.log("Database Connected");
+  .then(() => console.log("Database Connected"))
+  .catch((error) => console.log("Database Connection Error:", error));
 
-    app.listen(process.env.PORT, () => {
-      console.log(`Server Running On Port ${process.env.PORT}`);
-    });
-  })
-  .catch((error) => console.log(error));
+module.exports = app;
